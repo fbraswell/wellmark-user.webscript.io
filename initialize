@@ -1,0 +1,81 @@
+-- BEGIN COMMON HEADER
+
+-- Constants
+
+local WELLMARK_CHEM_PUMP_TYPE = "wellmark-chem-pump"
+local WELLMARK_CHEM_TANK_TYPE = "wellmark-chem-tank"
+local WELLMARK_FLOW_METER_TYPE = "wellmark-flow-meter"
+local WELLMARK_LEVEL_SENSOR_TYPE = "wellmark-level-sensor"
+local WELLMARK_HIGH_LEVEL_ALARM = "wellmark-high-level-alarm"
+
+local CHEM_PUMP_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/chemical-pump-icon.jpg"
+local CHEM_TANK_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/chemical-tank-icon.jpg"
+local LEVEL_SENSOR_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/oil-tank-icon.jpg"
+local HIGH_LEVEL_ALARM_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/oil-tank-icon.jpg"
+
+local CHEM_TANK_STRAPPING_CHART_NAME = "CHEM_TANK_STRAPPING_CHART"
+local CHEM_TANK_STRAPPING_CHART_225 = "CHEM_TANK_STRAPPING_CHART_225"
+local DEVON_CHEM_TANK_STRAPPING_CHART_NAME = "DEVON_CHEM_TANK_STRAPPING_CHART"
+local DEVON_HORIZONTAL_CHEM_TANK_STRAPPING_CHART_NAME = "DEVON_HORIZONTAL_CHEM_TANK_STRAPPING_CHART"
+local OIL_AND_BRINE_TANK_STRAPPING_CHART_NAME = "OIL_AND_BRINE_TANK_STRAPPING_CHART"
+
+-- Quarts Per Day Constants
+
+local QUARTS_PER_DAY_DEFAULT_MINIMUM_VALUE = 0
+local QUARTS_PER_DAY_DEFAULT_MAXIMUM_VALUE = 20
+local QUARTS_PER_DAY_SET_POINT_COLOR_STYLE_TEXT = "rgba(34, 177, 76, 1)"
+
+-- Temperature Constants
+
+local TEMPERATURE_DEFAULT_MINIMUM_VALUE = -50
+local TEMPERATURE_DEFAULT_MAXIMUM_VALUE = 150
+local TEMPERATURE_COLOR_STYLE_TEXT = "rgba(128, 0, 0, 1)"
+
+-- Informa Chem Tank Constants
+
+local INFORMA_CHEM_TANK_DEFAULT_MINIMUM_VALUE = 0
+local INFORMA_CHEM_TANK_DEFAULT_MAXIMUM_VALUE = 200
+local INFORMA_CHEM_TANK_GALLON_COLOR_STYLE_TEXT = "rgba(128, 128, 64, 1)"
+
+-- Oil and Brine Tank Constants
+
+local INFORMA_OIL_AND_BRINE_TANK_DEFAULT_MINIMUM_VALUE = 0
+local INFORMA_OIL_AND_BRINE_TANK_DEFAULT_MAXIMUM_VALUE = 200
+local INFORMA_OIL_AND_BRINE_TANK_COLOR_STYLE_TEXT = "rgba(92, 72, 46, 1)"
+
+-- 
+
+function md5RawPassword(rawPassword)
+	local md5edPassword = crypto.md5(rawPassword).hexdigest()
+	
+	return md5edPassword
+end
+
+function callWebscript(localWebscriptName)
+	local absoluteWebscriptName = ("http://wellmark-user.webscript.io/" .. localWebscriptName)
+
+	http.request(
+	{
+		url = absoluteWebscriptName,
+		method = "get",
+		params = {},
+		headers = {}
+	})
+end
+
+-- END COMMON HEADER
+
+storage.users = json.stringify({})
+callWebscript("upland-in-test-user")
+callWebscript("indianapolis-in-test-user")
+callWebscript("wellmark-test-user")
+callWebscript("devon-field-trial-informa-user")
+callWebscript("devon-field-trial-devon-user")
+callWebscript("devon-field-trial-wellmark-user")
+callWebscript("informa-christmas-chem-pump-1-user")
+callWebscript("informa-christmas-chem-pump-2-user")
+callWebscript("eog-user")
+
+-- TODO: Map userID => leases
+
+return json.parse(storage.users)
