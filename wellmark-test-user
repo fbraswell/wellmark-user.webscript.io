@@ -1,0 +1,284 @@
+-- BEGIN COMMON HEADER
+
+-- Constants
+
+local WELLMARK_CHEM_PUMP_TYPE = "wellmark-chem-pump"
+local WELLMARK_CHEM_TANK_TYPE = "wellmark-chem-tank"
+local WELLMARK_FLOW_METER_TYPE = "wellmark-flow-meter"
+local WELLMARK_LEVEL_SENSOR_TYPE = "wellmark-level-sensor"
+local WELLMARK_HIGH_LEVEL_ALARM = "wellmark-high-level-alarm"
+
+local CHEM_PUMP_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/chemical-pump-icon.jpg"
+local CHEM_TANK_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/chemical-tank-icon.jpg"
+local LEVEL_SENSOR_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/oil-tank-icon.jpg"
+local HIGH_LEVEL_ALARM_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/oil-tank-icon.jpg"
+
+local CHEM_TANK_STRAPPING_CHART_NAME = "CHEM_TANK_STRAPPING_CHART"
+local DEVON_CHEM_TANK_STRAPPING_CHART_NAME = "DEVON_CHEM_TANK_STRAPPING_CHART"
+local DEVON_HORIZONTAL_CHEM_TANK_STRAPPING_CHART_NAME = "DEVON_HORIZONTAL_CHEM_TANK_STRAPPING_CHART"
+local OIL_AND_BRINE_TANK_STRAPPING_CHART_NAME = "OIL_AND_BRINE_TANK_STRAPPING_CHART"
+
+-- Quarts Per Day Constants
+
+local QUARTS_PER_DAY_DEFAULT_MINIMUM_VALUE = 0
+local QUARTS_PER_DAY_DEFAULT_MAXIMUM_VALUE = 20
+local QUARTS_PER_DAY_SET_POINT_COLOR_STYLE_TEXT = "rgba(34, 177, 76, 1)"
+
+-- Temperature Constants
+
+local TEMPERATURE_DEFAULT_MINIMUM_VALUE = -50
+local TEMPERATURE_DEFAULT_MAXIMUM_VALUE = 150
+local TEMPERATURE_COLOR_STYLE_TEXT = "rgba(128, 0, 0, 1)"
+
+-- Informa Chem Tank Constants
+
+local INFORMA_CHEM_TANK_DEFAULT_MINIMUM_VALUE = 0
+local INFORMA_CHEM_TANK_DEFAULT_MAXIMUM_VALUE = 200
+local INFORMA_CHEM_TANK_GALLON_COLOR_STYLE_TEXT = "rgba(128, 128, 64, 1)"
+
+-- Oil and Brine Tank Constants
+
+local INFORMA_OIL_AND_BRINE_TANK_DEFAULT_MINIMUM_VALUE = 0
+local INFORMA_OIL_AND_BRINE_TANK_DEFAULT_MAXIMUM_VALUE = 200
+local INFORMA_OIL_AND_BRINE_TANK_COLOR_STYLE_TEXT = "rgba(92, 72, 46, 1)"
+
+-- 
+
+function md5RawPassword(rawPassword)
+	local md5edPassword = crypto.md5(rawPassword).hexdigest()
+	
+	return md5edPassword
+end
+
+function callWebscript(localWebscriptName)
+	local absoluteWebscriptName = ("http://wellmark-user.webscript.io/" .. localWebscriptName)
+
+	http.request(
+	{
+		url = absoluteWebscriptName,
+		method = "get",
+		params = {},
+		headers = {}
+	})
+end
+
+-- END COMMON HEADER
+
+local users = json.parse(storage.users)
+
+-- Create wellmark-chem-tank Asset.
+
+local well22ChemTankAsset =
+{
+	type = WELLMARK_CHEM_TANK_TYPE,
+	name = "Well 22 Chem Tank",
+	feedID = 467812498,
+	apiKey = "XEiiq8NpLgyLWXMICo1CsQRQa2Fd5vJ9omtmvQhSPNiyHKlX",
+	isActive = true,
+	primaryPictureURL = CHEM_TANK_PRIMARY_PICTURE_URL,
+	specificPictureURLs =
+	{
+	},
+	dataFields =
+	{
+		contains =
+		{
+			displayName = "Contains",
+			units = "",
+			fixedValue = "Formula Acme",
+			modifiable = false,
+			graphable = false,
+		},
+		daysToEmpty =
+		{
+			displayName = "Days to Empty",
+			units = "",
+			fixedValue = 1,
+			modifiable = false,
+			graphable = false,
+		},
+		gallonsLeft =
+		{
+			displayName = "Gallons Left",
+			units = "",
+			xivelyChannelName = "Gallons",
+			modifiable = false,
+			graphable = true
+		},
+		power =
+		{
+			displayName = "Power",
+			units = "",
+			fixedValue = "AC",
+			modifiable = false,
+			graphable = false
+		}--[[,
+		signal =
+		{
+			displayName = "Signal",
+			units = "",
+			fixedValue = "Full",
+			modifiable = false,
+			graphable = false
+		}]]
+	}
+}
+
+-- Create wellmark-level-sensor Asset.
+
+local levelSensorAsset =
+{
+	type = WELLMARK_LEVEL_SENSOR_TYPE,
+	name = "Crude Oil Tank 83",
+	feedID = 1889410555,
+	apiKey = "UNpHWaCkgWpR1Bxd8fJYIb5X7J5EAO0ysxnR7gBac1Mbcgm3",
+	primaryPictureURL = LEVEL_SENSOR_PRIMARY_PICTURE_URL,
+	specificPictureURLs =
+	{
+	},
+	dataFields =
+	{
+		barrels =
+		{
+			orderIndex = 1,
+			displayName = "Barrels",
+			units = "",
+			xivelyChannelName = "Volts_Pressure_Inches_Gallons_Barrels",
+			modifiable = false,
+			graphable = true,
+			yAxisKey = 1,
+			yAxisPosition = "left",
+			defaultMinimumValue = INFORMA_OIL_AND_BRINE_TANK_DEFAULT_MINIMUM_VALUE,
+			defaultMaximumValue = INFORMA_OIL_AND_BRINE_TANK_DEFAULT_MAXIMUM_VALUE,
+			graphColorStyleText = INFORMA_OIL_AND_BRINE_TANK_COLOR_STYLE_TEXT,
+		},
+		--[[temperature =
+		{
+			displayName = "Temperature",
+			units = "F",
+			xivelyChannelName = "Temperature",
+			modifiable = false,
+			graphable = true,
+			yAxisKey = 2,
+			yAxisPosition = "right",
+			defaultMinimumValue = TEMPERATURE_DEFAULT_MINIMUM_VALUE,
+			defaultMaximumValue = TEMPERATURE_DEFAULT_MAXIMUM_VALUE,
+			graphColorStyleText = TEMPERATURE_COLOR_STYLE_TEXT,
+		},]]
+		water =
+		{
+			displayName = "Water",
+			units = "in",
+			fixedValue = 6,
+			modifiable = false,
+			graphable = false,
+		},
+		daysToFull =
+		{
+			displayName = "Days To Full",
+			units = "",
+			fixedValue = 30,
+			modifiable = false,
+			graphable = false
+		},
+		barrelsPerDay =
+		{
+			displayName = "Barrels/Day",
+			units = "",
+			fixedValue = 5,
+			modifiable = false,
+			graphable = false
+		}--[[,
+		signal =
+		{
+			displayName = "Signal",
+			units = "",
+			fixedValue = "Full",
+			modifiable = false,
+			graphable = false
+		}]]
+	}
+}
+
+-- Create wellmark-high-level-alarm Asset.
+
+local highLevelAlarmAsset =
+{
+	type = WELLMARK_HIGH_LEVEL_ALARM,
+	name = "Production Water Tank 91",
+	feedID = 1751179768,
+	apiKey = "yiPzMQXWRgaBMhUh3CIOHwAC6cPYhcol9rOZvDfkyUS3RPGr",
+	isActive = true,
+	primaryPictureURL = HIGH_LEVEL_ALARM_PRIMARY_PICTURE_URL,
+	specificPictureURLs =
+	{
+	},
+	dataFields =
+	{
+		--[[highAlarm =
+		{
+			displayName = "High Alarm",
+			units = "",
+			xivelyChannelName = "Switch1",
+			modifiable = false,
+			graphable = false,
+		},]]
+		--[[battery =
+		{
+			displayName = "Battery",
+			units = "%",
+			fixedValue = 100,
+			modifiable = false,
+			graphable = false
+		},
+		signal =
+		{
+			displayName = "Signal",
+			units = "",
+			fixedValue = "Full",
+			modifiable = false,
+			graphable = false
+		}]]
+	}
+}
+
+-- Create Somewhere, OK Lease.
+
+local ardmoreOKLease =
+{
+	name = "Ardmore, OK",
+	id = "1265c9c5-29c5-4a7b-a05c-a892b47dc7b5",
+	lat = 34.336956,
+	lon = -97.34359,
+	physicalAddress = "Ardmore, OK",
+	state = "Oklahoma",
+	region = "Central",
+	field = "Morton",
+	assets =
+	{
+		well22ChemTankAsset,
+		levelSensorAsset,
+		highLevelAlarmAsset
+	}
+}
+
+-- Create Wellmark Test User.
+
+local wellmarkTestUser =
+{
+	firstName = "Wellmark",
+	lastName = "Test",
+	affiliation = "Wellmark",
+	username = "wellmark@wellmarkfoo.com",
+	password = md5RawPassword("wellmarkTestFoo"),
+	userID = "4b90b907-0227-427f-b4d9-ff317f79ba6b",
+	leases =
+	{
+		ardmoreOKLease
+	}
+}
+
+table.insert(users, indianapolisINUser)
+storage.users = json.stringify(users)
+
+return json.parse(storage.users)
