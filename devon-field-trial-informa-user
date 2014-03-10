@@ -1,0 +1,467 @@
+-- BEGIN COMMON HEADER
+
+-- Constants
+
+local WELLMARK_CHEM_PUMP_TYPE = "wellmark-chem-pump"
+local WELLMARK_CHEM_TANK_TYPE = "wellmark-chem-tank"
+local WELLMARK_FLOW_METER_TYPE = "wellmark-flow-meter"
+local WELLMARK_LEVEL_SENSOR_TYPE = "wellmark-level-sensor"
+local WELLMARK_HIGH_LEVEL_ALARM = "wellmark-high-level-alarm"
+
+local CHEM_PUMP_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/chemical-pump-icon.jpg"
+local CHEM_TANK_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/chemical-tank-icon.jpg"
+local LEVEL_SENSOR_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/oil-tank-icon.jpg"
+local HIGH_LEVEL_ALARM_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/oil-tank-icon.jpg"
+
+local CHEM_TANK_STRAPPING_CHART_NAME = "CHEM_TANK_STRAPPING_CHART"
+local CHEM_TANK_STRAPPING_CHART_335_TEST = "CHEM_TANK_STRAPPING_CHART_335_TEST"
+local DEVON_CHEM_TANK_STRAPPING_CHART_NAME = "DEVON_CHEM_TANK_STRAPPING_CHART"
+local DEVON_HORIZONTAL_CHEM_TANK_STRAPPING_CHART_NAME = "DEVON_HORIZONTAL_CHEM_TANK_STRAPPING_CHART"
+local OIL_AND_BRINE_TANK_STRAPPING_CHART_NAME = "OIL_AND_BRINE_TANK_STRAPPING_CHART"
+local OIL_AND_BRINE_TANK_STRAPPING_CHART_TEST = "OIL_AND_BRINE_TANK_STRAPPING_CHART_TEST"
+
+-- Quarts Per Day Constants
+
+local QUARTS_PER_DAY_DEFAULT_MINIMUM_VALUE = 0
+local QUARTS_PER_DAY_DEFAULT_MAXIMUM_VALUE = 20
+local QUARTS_PER_DAY_SET_POINT_COLOR_STYLE_TEXT = "rgba(34, 177, 76, 1)"
+
+-- Temperature Constants
+
+local TEMPERATURE_DEFAULT_MINIMUM_VALUE = -50
+local TEMPERATURE_DEFAULT_MAXIMUM_VALUE = 150
+local TEMPERATURE_COLOR_STYLE_TEXT = "rgba(128, 0, 0, 1)"
+
+-- Informa Chem Tank Constants
+
+local INFORMA_CHEM_TANK_DEFAULT_MINIMUM_VALUE = 0
+local INFORMA_CHEM_TANK_DEFAULT_MAXIMUM_VALUE = 335
+local INFORMA_CHEM_TANK_GALLON_COLOR_STYLE_TEXT = "rgba(128, 128, 64, 1)"
+
+-- Oil and Brine Tank Constants
+
+local INFORMA_OIL_AND_BRINE_TANK_DEFAULT_MINIMUM_VALUE = 0
+local INFORMA_OIL_AND_BRINE_TANK_DEFAULT_MAXIMUM_VALUE = 200
+local INFORMA_OIL_AND_BRINE_TANK_COLOR_STYLE_TEXT = "rgba(92, 72, 46, 1)"
+
+-- 
+
+function md5RawPassword(rawPassword)
+	local md5edPassword = crypto.md5(rawPassword).hexdigest()
+	
+	return md5edPassword
+end
+
+function callWebscript(localWebscriptName)
+	local absoluteWebscriptName = ("http://wellmark-user.webscript.io/" .. localWebscriptName)
+
+	http.request(
+	{
+		url = absoluteWebscriptName,
+		method = "get",
+		params = {},
+		headers = {}
+	})
+end
+
+-- END COMMON HEADER
+
+-- FIELD TRIAL
+
+local FIELD_TRIAL_LATITUDE = 34.724422
+local FIELD_TRIAL_LONGITUDE = -96.148925
+local FIELD_TRIAL_REGION = "Central"
+local FIELD_TRIAL_FIELD = "<Field>"
+
+local users = json.parse(storage.users)
+
+local informaChemPump1 =
+{
+	type = WELLMARK_CHEM_PUMP_TYPE,
+	name = "Informa Field Test Pump 1",
+	feedID = 627874217,
+	apiKey = "w1buKrbzAknYTWiVGUsIsYY4C0asD1iF5KErllKbXR3VpEMi",
+	isActive = true,
+	primaryPictureURL = CHEM_PUMP_PRIMARY_PICTURE_URL,
+	specificPictureURLs =
+	{
+	},
+	dataFields =
+	{
+		setPointQuartsPerDay =
+		{
+			orderIndex = 0,
+			displayName = "Quarts Per Day Set Point",
+			units = " Quarts/Day",
+			xivelyChannelName = "Set_QuartsPerDay",
+			modifiable = true,
+			graphable = true,
+			yAxisKey = 1,
+			yAxisPosition = "left",
+			defaultMinimumValue = QUARTS_PER_DAY_DEFAULT_MINIMUM_VALUE,
+			defaultMaximumValue = QUARTS_PER_DAY_DEFAULT_MAXIMUM_VALUE,
+			graphColorStyleText = QUARTS_PER_DAY_SET_POINT_COLOR_STYLE_TEXT,
+		},
+		outputQuartsPerDay =
+		{
+			orderIndex = 1,
+			displayName = "Output Quarts Per Day",
+			units = " Quarts/Day",
+			xivelyChannelName = "MB_QuartsPerDay",
+			modifiable = false,
+			graphable = true,
+			shouldNotDisplay = true
+		},
+		temperature =
+		{
+			orderIndex = 2,
+			displayName = "Temperature",
+			units = "F",
+			xivelyChannelName = "MB_Temperature",
+			modifiable = false,
+			graphable = true,
+			yAxisKey = 2,
+			yAxisPosition = "right",
+			defaultMinimumValue = TEMPERATURE_DEFAULT_MINIMUM_VALUE,
+			defaultMaximumValue = TEMPERATURE_DEFAULT_MAXIMUM_VALUE,
+			graphColorStyleText = TEMPERATURE_COLOR_STYLE_TEXT,
+		},
+		--[[flowRate =
+		{
+			orderIndex = 3,
+			displayName = "Flow Rate",
+			units = " Quarts/Day",
+			xivelyChannelName = "MB_FlowRate",
+			modifiable = false,
+			graphable = true
+		},]]
+		--[[signalStrength =
+		{
+			orderIndex = 4,
+			displayName = "Signal Strength",
+			units = "dB",
+			xivelyChannelName = "Status_Signal_Strength",
+			modifiable = false,
+			graphable = true
+		},]]
+		--[[bootPass =
+		{
+			orderIndex = 5,
+			displayName = "Boot Pass",
+			units = "",
+			xivelyChannelName = "Status_BootPass",
+			modifiable = false,
+			graphable = true
+		},]]
+	}
+}
+
+local informaChemTank1 =
+{
+	type = WELLMARK_CHEM_TANK_TYPE,
+	name = "Informa Field Chem Tank 1",
+	feedID = 2105788416,
+	apiKey = "CbJjQsmbIKKhmvfwNXTXm2geO9lmsROQX3yB1YQKo37F6H1o",
+	isActive = true,
+	primaryPictureURL = CHEM_TANK_PRIMARY_PICTURE_URL,
+	specificPictureURLs =
+	{
+	},
+	strappingChartName = CHEM_TANK_STRAPPING_CHART_335_TEST,
+	dataFields =
+	{
+		voltage =
+		{
+			orderIndex = 0,
+			displayName = "Voltage",
+			units = "V",
+			xivelyChannelName = "Volts",
+			modifiable = false,
+			graphable = true,
+			minimum = 0.5,
+			maximum = 2.5,
+			minimum_PSI = 0.0,
+			maximum_PSI = 5,
+			specificGravity = 1.035,
+			shouldNotDisplay = true
+		},
+		gallons =
+		{
+			orderIndex = 1,
+			displayName = "Gallons",
+			units = "",
+			xivelyChannelName = "Volts_Pressure_Inches_Gallons",
+			modifiable = false,
+			graphable = true,
+			yAxisKey = 1,
+			yAxisPosition = "left",
+			defaultMinimumValue = INFORMA_CHEM_TANK_DEFAULT_MINIMUM_VALUE,
+			defaultMaximumValue = INFORMA_CHEM_TANK_DEFAULT_MAXIMUM_VALUE,
+			graphColorStyleText = INFORMA_CHEM_TANK_GALLON_COLOR_STYLE_TEXT,
+		},
+		temperature =
+		{
+			orderIndex = 2,
+			displayName = "Temperature",
+			units = "F",
+			xivelyChannelName = "Temperature",
+			modifiable = false,
+			graphable = true,
+			yAxisKey = 2,
+			yAxisPosition = "right",
+			defaultMinimumValue = TEMPERATURE_DEFAULT_MINIMUM_VALUE,
+			defaultMaximumValue = TEMPERATURE_DEFAULT_MAXIMUM_VALUE,
+			graphColorStyleText = TEMPERATURE_COLOR_STYLE_TEXT,
+		},
+		daysLeftToEmpty =
+		{
+			orderIndex = 3,
+			displayName = "Days Left to Empty",
+			units = "",
+			xivelyChannelName = "Days_Left_To_Empty",
+			pumpFeedID = 627874217,
+			modifiable = false,
+			graphable = false,
+		},
+		--[[highAlarm =
+		{
+			orderIndex = 3,
+			displayName = "High Alarm",
+			units = "",
+			xivelyChannelName = "Switch1",
+			modifiable = false,
+			graphable = false,
+		},]]
+		--[[signalStrength =
+		{
+			orderIndex = 4,
+			displayName = "Signal Strength",
+			units = "dB",
+			xivelyChannelName = "Status_Signal_Strength",
+			modifiable = false,
+			graphable = true
+		},]]
+		--[[battery =
+		{
+			orderIndex = 5,
+			displayName = "Battery",
+			units = "V",
+			xivelyChannelName = "Status_vbat",
+			modifiable = false,
+			graphable = true
+		},]]
+	}
+}
+
+-- TODO: Add custom picture.
+local informaBrineTank1 =
+{
+	type = WELLMARK_HIGH_LEVEL_ALARM,
+	name = "Informa Field Brine Tank 1",
+	feedID = 1432343757,
+	apiKey = "9ehXeWj4AFJ5TD2rKiRInZ664Xv6qiuiGtxciWGLseWIxJ3e",
+	isActive = true,
+	primaryPictureURL = HIGH_LEVEL_ALARM_PRIMARY_PICTURE_URL,
+	specificPictureURLs =
+	{
+	},
+	strappingChartName = OIL_AND_BRINE_TANK_STRAPPING_CHART_TEST,
+	dataFields =
+	{
+		voltage =
+		{
+			orderIndex = 0,
+			displayName = "Voltage",
+			units = "V",
+			xivelyChannelName = "Volts",
+			modifiable = false,
+			graphable = true,
+			minimum = 0.5,
+			maximum = 4.5,
+			minimum_PSI = 0.0,
+			maximum_PSI = 10,
+			specificGravity = 1.08,
+			shouldNotDisplay = true
+		},
+		barrels =
+		{
+			orderIndex = 1,
+			displayName = "Barrels",
+			units = "",
+			xivelyChannelName = "Volts_Pressure_Inches_Gallons_Barrels",
+			modifiable = false,
+			graphable = true,
+			yAxisKey = 1,
+			yAxisPosition = "left",
+			defaultMinimumValue = INFORMA_OIL_AND_BRINE_TANK_DEFAULT_MINIMUM_VALUE,
+			defaultMaximumValue = INFORMA_OIL_AND_BRINE_TANK_DEFAULT_MAXIMUM_VALUE,
+			graphColorStyleText = INFORMA_OIL_AND_BRINE_TANK_COLOR_STYLE_TEXT,
+		},
+		--[[temperature =
+		{
+			orderIndex = 2,
+			displayName = "Temperature",
+			units = "F",
+			xivelyChannelName = "Temperature",
+			modifiable = false,
+			graphable = true,
+			yAxisKey = 2,
+			yAxisPosition = "right",
+			defaultMinimumValue = TEMPERATURE_DEFAULT_MINIMUM_VALUE,
+			defaultMaximumValue = TEMPERATURE_DEFAULT_MAXIMUM_VALUE,
+			graphColorStyleText = TEMPERATURE_COLOR_STYLE_TEXT,
+		},]]
+		--[[highAlarm =
+		{
+			orderIndex = 3,
+			displayName = "High Alarm",
+			units = "",
+			xivelyChannelName = "Switch1",
+			modifiable = false,
+			graphable = false,
+		},]]
+		--[[signalStrength =
+		{
+			orderIndex = 4,
+			displayName = "Signal Strength",
+			units = "dB",
+			xivelyChannelName = "Status_Signal_Strength",
+			modifiable = false,
+			graphable = true
+		},]]
+		--[[battery =
+		{
+			orderIndex = 5,
+			displayName = "Battery",
+			units = "V",
+			xivelyChannelName = "Status_vbat",
+			modifiable = false,
+			graphable = true
+		},]]
+	}
+}
+
+local informaCrudeTank1 =
+{
+	type = WELLMARK_LEVEL_SENSOR_TYPE,
+	name = "Informa Field Crude Tank 1",
+	feedID = 2033339257,
+	apiKey = "fIiRLSNzPa6k4aLm6MahSd3G9NTqwwEsL3UWUql2EGrHKp9o",
+	isActive = true,
+	primaryPictureURL = LEVEL_SENSOR_PRIMARY_PICTURE_URL,
+	specificPictureURLs =
+	{
+	},
+	strappingChartName = OIL_AND_BRINE_TANK_STRAPPING_CHART_NAME,
+	dataFields =
+	{
+		voltage =
+		{
+			orderIndex = 0,
+			displayName = "Voltage",
+			units = "V",
+			xivelyChannelName = "Volts",
+			modifiable = false,
+			graphable = true,
+			minimum = 0.5,
+			maximum = 2.5,
+			minimum_PSI = 0.0,
+			maximum_PSI = 10,
+			specificGravity = 1.0,
+			shouldNotDisplay = true
+		},
+		barrels =
+		{
+			orderIndex = 1,
+			displayName = "Barrels",
+			units = "",
+			xivelyChannelName = "Volts_Pressure_Inches_Gallons_Barrels",
+			modifiable = false,
+			graphable = true,
+			yAxisKey = 1,
+			yAxisPosition = "left",
+			defaultMinimumValue = INFORMA_OIL_AND_BRINE_TANK_DEFAULT_MINIMUM_VALUE,
+			defaultMaximumValue = INFORMA_OIL_AND_BRINE_TANK_DEFAULT_MAXIMUM_VALUE,
+			graphColorStyleText = INFORMA_OIL_AND_BRINE_TANK_COLOR_STYLE_TEXT,
+		},
+		--[[temperature =
+		{
+			orderIndex = 2,
+			displayName = "Temperature",
+			units = "F",
+			xivelyChannelName = "Temperature",
+			modifiable = false,
+			graphable = true,
+			yAxisKey = 2,
+			yAxisPosition = "right",
+			defaultMinimumValue = TEMPERATURE_DEFAULT_MINIMUM_VALUE,
+			defaultMaximumValue = TEMPERATURE_DEFAULT_MAXIMUM_VALUE,
+			graphColorStyleText = TEMPERATURE_COLOR_STYLE_TEXT,
+		},]]
+		--[[highAlarm =
+		{
+			orderIndex = 3,
+			displayName = "High Alarm",
+			units = "",
+			xivelyChannelName = "Switch1",
+			modifiable = false,
+			graphable = false,
+		},]]
+		--[[signalStrength =
+		{
+			orderIndex = 4,
+			displayName = "Signal Strength",
+			units = "dB",
+			xivelyChannelName = "Status_Signal_Strength",
+			modifiable = false,
+			graphable = true
+		},]]
+		--[[battery =
+		{
+			orderIndex = 5,
+			displayName = "Battery",
+			units = "V",
+			xivelyChannelName = "Status_vbat",
+			modifiable = false,
+			graphable = true
+		},]]
+	}
+}
+
+local fieldTrial_Informa_Lease =
+{
+	name = "Field Trial Informa Lease",
+	id = "8cc890c9-d7d9-437d-8e1b-138e340376a2",
+	lat = FIELD_TRIAL_LATITUDE,
+	lon = FIELD_TRIAL_LONGITUDE,
+	physicalAddress = "Mcalester, OK",
+	state = "Oklahoma",
+	region = FIELD_TRIAL_REGION,
+	field = FIELD_TRIAL_FIELD,
+	assets =
+	{
+		informaChemPump1,
+		informaChemTank1,
+		informaBrineTank1,
+		informaCrudeTank1,
+	}
+}
+
+local fieldTrial_Informa_User =
+{
+	firstName = "Informa Test",
+	lastName = "LCC",
+	affiliation = "Informa, LLC",
+	username = "informa",
+	password = md5RawPassword("wellmark"),
+	userID = "143cc31d-cabe-4b91-a7e6-1aa017078c18",
+	leases =
+	{
+		fieldTrial_Informa_Lease
+	}
+}
+
+table.insert(users, fieldTrial_Informa_User)
+storage.users = json.stringify(users)
+
+return json.parse(storage.users)
