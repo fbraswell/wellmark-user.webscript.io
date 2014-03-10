@@ -1,0 +1,10 @@
+log(request.query.userID)
+if request.method == "GET" then
+	for ii, user in ipairs(json.parse(storage.users)) do
+		if user.userID == request.query.userID then
+			return user
+		end
+	end
+else
+	return 405, "Only GET requests are allowed for this action."
+end
