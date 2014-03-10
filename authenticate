@@ -1,0 +1,18 @@
+if request.method == "POST" then
+	local username = request.form.username
+	local password = request.form.password
+
+	for ii, user in ipairs(json.parse(storage.users)) do
+		if user.username == username then
+			if user.password == password then
+				return "" .. user.userID
+			else
+				return 403, "Failed to authenticate."
+			end
+		end
+	end
+
+	return 403, "Failed to authenticate."
+else
+	return 405, "Only POST requests are allowed for this action."
+end
