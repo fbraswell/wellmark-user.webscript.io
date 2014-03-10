@@ -1,0 +1,285 @@
+-- BEGIN COMMON HEADER
+
+-- Constants
+
+local WELLMARK_CHEM_PUMP_TYPE = "wellmark-chem-pump"
+local WELLMARK_CHEM_TANK_TYPE = "wellmark-chem-tank"
+local WELLMARK_FLOW_METER_TYPE = "wellmark-flow-meter"
+local WELLMARK_LEVEL_SENSOR_TYPE = "wellmark-level-sensor"
+local WELLMARK_HIGH_LEVEL_ALARM = "wellmark-high-level-alarm"
+
+local CHEM_PUMP_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/chemical-pump-icon.jpg"
+local CHEM_TANK_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/chemical-tank-icon.jpg"
+local LEVEL_SENSOR_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/oil-tank-icon.jpg"
+local HIGH_LEVEL_ALARM_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/oil-tank-icon.jpg"
+
+local CHEM_TANK_STRAPPING_CHART_NAME = "CHEM_TANK_STRAPPING_CHART"
+local DEVON_CHEM_TANK_STRAPPING_CHART_NAME = "DEVON_CHEM_TANK_STRAPPING_CHART"
+local DEVON_HORIZONTAL_CHEM_TANK_STRAPPING_CHART_NAME = "DEVON_HORIZONTAL_CHEM_TANK_STRAPPING_CHART"
+local OIL_AND_BRINE_TANK_STRAPPING_CHART_NAME = "OIL_AND_BRINE_TANK_STRAPPING_CHART"
+
+-- Quarts Per Day Constants
+
+local QUARTS_PER_DAY_DEFAULT_MINIMUM_VALUE = 0
+local QUARTS_PER_DAY_DEFAULT_MAXIMUM_VALUE = 20
+local QUARTS_PER_DAY_SET_POINT_COLOR_STYLE_TEXT = "rgba(34, 177, 76, 1)"
+
+-- Temperature Constants
+
+local TEMPERATURE_DEFAULT_MINIMUM_VALUE = -50
+local TEMPERATURE_DEFAULT_MAXIMUM_VALUE = 150
+local TEMPERATURE_COLOR_STYLE_TEXT = "rgba(128, 0, 0, 1)"
+
+-- Informa Chem Tank Constants
+
+local INFORMA_CHEM_TANK_DEFAULT_MINIMUM_VALUE = 0
+local INFORMA_CHEM_TANK_DEFAULT_MAXIMUM_VALUE = 200
+local INFORMA_CHEM_TANK_GALLON_COLOR_STYLE_TEXT = "rgba(128, 128, 64, 1)"
+
+-- Oil and Brine Tank Constants
+
+local INFORMA_OIL_AND_BRINE_TANK_DEFAULT_MINIMUM_VALUE = 0
+local INFORMA_OIL_AND_BRINE_TANK_DEFAULT_MAXIMUM_VALUE = 200
+local INFORMA_OIL_AND_BRINE_TANK_COLOR_STYLE_TEXT = "rgba(92, 72, 46, 1)"
+
+-- 
+
+function md5RawPassword(rawPassword)
+	local md5edPassword = crypto.md5(rawPassword).hexdigest()
+	
+	return md5edPassword
+end
+
+function callWebscript(localWebscriptName)
+	local absoluteWebscriptName = ("http://wellmark-user.webscript.io/" .. localWebscriptName)
+
+	http.request(
+	{
+		url = absoluteWebscriptName,
+		method = "get",
+		params = {},
+		headers = {}
+	})
+end
+
+-- END COMMON HEADER
+
+-- FIELD TRIAL
+
+local FIELD_TRIAL_LATITUDE = 34.724422
+local FIELD_TRIAL_LONGITUDE = -96.148925
+local FIELD_TRIAL_REGION = "Central"
+local FIELD_TRIAL_FIELD = "<Field>"
+
+local users = json.parse(storage.users)
+
+-- Informa Christmas Chemp Pump 2
+
+local informaChristmasChemPump2 =
+{
+	type = WELLMARK_CHEM_PUMP_TYPE,
+	name = "Informa Chem Pump 2",
+	feedID = 1325563619,
+	apiKey = "yvIsehmvB1EGt4rAQrKObbDTFdtNIgExhvkXoi5h75R5xRZt",
+	isActive = true,
+	primaryPictureURL = CHEM_PUMP_PRIMARY_PICTURE_URL,
+	specificPictureURLs =
+	{
+	},
+	dataFields =
+	{
+		setPointQuartsPerDay =
+		{
+			orderIndex = 0,
+			displayName = "Quarts Per Day Set Point",
+			units = " Quarts/Day",
+			xivelyChannelName = "Set_QuartsPerDay",
+			modifiable = true,
+			graphable = true,
+			yAxisKey = 1,
+			yAxisPosition = "left",
+			defaultMinimumValue = QUARTS_PER_DAY_DEFAULT_MINIMUM_VALUE,
+			defaultMaximumValue = QUARTS_PER_DAY_DEFAULT_MAXIMUM_VALUE,
+			graphColorStyleText = QUARTS_PER_DAY_SET_POINT_COLOR_STYLE_TEXT,
+		},
+		outputQuartsPerDay =
+		{
+			orderIndex = 1,
+			displayName = "Output Quarts Per Day",
+			units = " Quarts/Day",
+			xivelyChannelName = "MB_QuartsPerDay",
+			modifiable = false,
+			graphable = true,
+			shouldNotDisplay = true
+		},
+		temperature =
+		{
+			orderIndex = 2,
+			displayName = "Temperature",
+			units = "F",
+			xivelyChannelName = "MB_Temperature",
+			modifiable = false,
+			graphable = true,
+			yAxisKey = 2,
+			yAxisPosition = "right",
+			defaultMinimumValue = TEMPERATURE_DEFAULT_MINIMUM_VALUE,
+			defaultMaximumValue = TEMPERATURE_DEFAULT_MAXIMUM_VALUE,
+			graphColorStyleText = TEMPERATURE_COLOR_STYLE_TEXT,
+		},
+		--[[signalStrength =
+		{
+			orderIndex = 3,
+			displayName = "Signal Strength",
+			units = "dB",
+			xivelyChannelName = "Status_Signal_Strength",
+			modifiable = false,
+			graphable = true,
+			yAxisKey = 2,
+			yAxisPosition = "right",
+		},]]
+		--[[flowRate =
+		{
+			orderIndex = 4,
+			displayName = "Flow Rate",
+			units = " Quarts/Day",
+			xivelyChannelName = "MB_FlowRate",
+			modifiable = false,
+			graphable = true
+		},]]
+	}
+}
+
+local informaChristmasChemTank2 =
+{
+	type = WELLMARK_CHEM_TANK_TYPE,
+	name = "Informa Chem Tank 2",
+	feedID = 1995311635,
+	apiKey = "EY8ON0sBYDAVmocxjYIrWAxUggZzxcNrrO1R9NsvXyxthfu1",
+	isActive = true,
+	primaryPictureURL = CHEM_TANK_PRIMARY_PICTURE_URL,
+	specificPictureURLs =
+	{
+	},
+	strappingChartName = DEVON_CHEM_TANK_STRAPPING_CHART_NAME,
+	dataFields =
+	{
+		voltage =
+		{
+			orderIndex = 0,
+			displayName = "Voltage",
+			units = "V",
+			xivelyChannelName = "Volts",
+			modifiable = false,
+			graphable = true,
+			minimum = 0.5,
+			maximum = 2.5,
+			minimum_PSI = 0.0,
+			maximum_PSI = 5,
+			specificGravity = 1.0,
+			shouldNotDisplay = true
+		},
+		gallons =
+		{
+			orderIndex = 1,
+			displayName = "Gallons",
+			units = "",
+			xivelyChannelName = "Volts_Pressure_Inches_Gallons",
+			modifiable = false,
+			graphable = true,
+			yAxisKey = 1,
+			yAxisPosition = "left",
+			defaultMinimumValue = INFORMA_CHEM_TANK_DEFAULT_MINIMUM_VALUE,
+			defaultMaximumValue = INFORMA_CHEM_TANK_DEFAULT_MAXIMUM_VALUE,
+			graphColorStyleText = INFORMA_CHEM_TANK_GALLON_COLOR_STYLE_TEXT,
+		},
+		temperature =
+		{
+			orderIndex = 2,
+			displayName = "Temperature",
+			units = "F",
+			xivelyChannelName = "Temperature",
+			modifiable = false,
+			graphable = true,
+			yAxisKey = 2,
+			yAxisPosition = "right",
+			defaultMinimumValue = TEMPERATURE_DEFAULT_MINIMUM_VALUE,
+			defaultMaximumValue = TEMPERATURE_DEFAULT_MAXIMUM_VALUE,
+			graphColorStyleText = TEMPERATURE_COLOR_STYLE_TEXT,
+		},
+		daysLeftToEmpty =
+		{
+			orderIndex = 3,
+			displayName = "Days Left to Empty",
+			units = "",
+			xivelyChannelName = "Days_Left_To_Empty",
+			pumpFeedID = 1325563619,
+			modifiable = false,
+			graphable = false,
+		},
+		--[[highAlarm =
+		{
+			orderIndex = 3,
+			displayName = "High Alarm",
+			units = "",
+			xivelyChannelName = "Switch1",
+			modifiable = false,
+			graphable = false,
+		},]]
+		--[[signalStrength =
+		{
+			orderIndex = 4,
+			displayName = "Signal Strength",
+			units = "dB",
+			xivelyChannelName = "Status_Signal_Strength",
+			modifiable = false,
+			graphable = true,
+			yAxisKey = 2,
+			yAxisPosition = "right",
+		},]]
+		--[[battery =
+		{
+			orderIndex = 5,
+			displayName = "Battery",
+			units = "V",
+			xivelyChannelName = "Status_vbat",
+			modifiable = false,
+			graphable = true
+		},]]
+	}
+}
+
+local informa_Christmas_Lease_2 =
+{
+	name = "Informa Christmas Lease 2",
+	id = "af2acecb-7eb4-4dcd-974d-9f4ad51b6b09",
+	lat = 39.781288,
+	lon = -86.137571,
+	physicalAddress = "1125 Brookside Ave., Indianapolis, IN  46202",
+	state = "Indiana",
+	region = "Central",
+	field = "Corn",
+	assets =
+	{
+		informaChristmasChemPump2,
+		informaChristmasChemTank2
+	}
+}
+
+local informa_Christmas_User_2 =
+{
+	firstName = "Informa Christmas",
+	lastName = "2",
+	affiliation = "Informa, LLC",
+	username = "informa_chem_pump_2",
+	password = md5RawPassword("christmas"),
+	userID = "48afeedb-eb2f-4763-94d4-8907eccd7027",
+	leases =
+	{
+		informa_Christmas_Lease_2
+	}
+}
+
+table.insert(users, informa_Christmas_User_2)
+storage.users = json.stringify(users)
+
+return json.parse(storage.users)
