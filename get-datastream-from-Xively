@@ -1,0 +1,75 @@
+local findUser = function(userID)
+	for ii, user in ipairs(json.parse(storage.users)) do
+		if tostring(user.userID) == userID then
+			return user
+		end
+	end
+	
+	return nil
+end
+
+local findLease = function(user, leaseID)
+	for ii, lease in ipairs(user.leases) do
+		if tostring(lease.id) == leaseID then
+			return lease
+		end
+	end
+	
+	return nil
+end
+
+local findAsset = function(lease, assetFeedID)
+	for ii, asset in ipairs(lease.assets) do
+		if tostring(asset.feedID) == assetFeedID then
+			return asset
+		end
+	end
+	
+	return nil
+end
+
+if request.method == "POST" then
+	local userID = tostring(request.form.userID)
+	local user = findUser(userID)
+	if user ~= nil then
+		local leaseID = tostring(request.form.leaseID)
+		local lease = findLease(user, leaseID)
+		if lease ~= nil then
+			local assetFeedID = tostring(request.form.assetFeedID)
+			local asset = findAsset(lease, assetFeedID)
+			if asset ~= nil then
+				local url = ("https://api.xively.com/v2/feeds/" .. assetFeedID .. ".json")
+				local start = string.gsub(request.form.startTimeInISO, "%%3A", ":")
+				log(url)
+				log ("start: " .. start)
+				local dataFromXively = http.request(
+				{
+					url = url,
+					method = "get",
+					params =
+					{
+						start = start,
+						interval = request.form.intervalInMilliseconds,
+						interval_type = request.form.intervalType,
+						limit = request.form.limit
+					},
+					headers =
+					{
+						["X-Api-Key"] = asset.apiKey,
+						Authorization = "Basic ZmJyYXN3ZWxsOm1lcnJpdHQxODY1"
+					}
+				})
+				
+				return dataFromXively.content
+			else
+				return 403, "Invalid lookup (asset)."
+			end
+		else
+			return 403, "Invalid lookup (lease)."
+		end
+	else
+		return 403, "Invalid lookup (user)."
+	end
+else
+	return 405, "Only POST requests are allowed for this action."
+end
