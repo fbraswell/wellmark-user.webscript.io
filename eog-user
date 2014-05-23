@@ -8,11 +8,14 @@ local WELLMARK_FLOW_METER_TYPE = "wellmark-flow-meter"
 local WELLMARK_LEVEL_SENSOR_TYPE = "wellmark-level-sensor"
 local WELLMARK_HIGH_LEVEL_ALARM = "wellmark-high-level-alarm"
 
-local CHEM_PUMP_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/chemical-pump-icon.jpg"
-local CHEM_TANK_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/chemical-tank-icon.jpg"
+local CHEM_PUMP_1_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/assets/eog/EOG_Chem_Pump_1.jpg"
+local CHEM_TANK_1_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/assets/eog/EOG_Chem_Tank_1.jpg"
+local CHEM_TANK_1A_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/assets/eog/EOG_Chem_Tank_1a.jpg"
 local LEVEL_SENSOR_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/oil-tank-icon.jpg"
 local HIGH_LEVEL_ALARM_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/oil-tank-icon.jpg"
 
+local CHEM_TANK_STRAPPING_CHART_335 = "CHEM_TANK_STRAPPING_CHART_335_TEST"
+local CHEM_TANK_STRAPPING_CHART_350 = "CHEM_TANK_STRAPPING_CHART_350"
 local CHEM_TANK_STRAPPING_CHART_NAME = "CHEM_TANK_STRAPPING_CHART"
 local DEVON_CHEM_TANK_STRAPPING_CHART_NAME = "DEVON_CHEM_TANK_STRAPPING_CHART"
 local DEVON_HORIZONTAL_CHEM_TANK_STRAPPING_CHART_NAME = "DEVON_HORIZONTAL_CHEM_TANK_STRAPPING_CHART"
@@ -33,7 +36,7 @@ local TEMPERATURE_COLOR_STYLE_TEXT = "rgba(128, 0, 0, 1)"
 -- Informa Chem Tank Constants
 
 local INFORMA_CHEM_TANK_DEFAULT_MINIMUM_VALUE = 0
-local INFORMA_CHEM_TANK_DEFAULT_MAXIMUM_VALUE = 200
+local INFORMA_CHEM_TANK_DEFAULT_MAXIMUM_VALUE = 350
 local INFORMA_CHEM_TANK_GALLON_COLOR_STYLE_TEXT = "rgba(128, 128, 64, 1)"
 
 -- Oil and Brine Tank Constants
@@ -67,7 +70,7 @@ end
 -- FIELD TRIAL
 
 local EOG_FIELD_TRIAL_LATITUDE = 31.488
-local EOG_FIELD_TRIAL_LONGITUDE = -94.172274
+local EOG_FIELD_TRIAL_LONGITUDE = -94.172
 local EOG_FIELD_TRIAL_REGION = "Central"
 local EOG_FIELD_TRIAL_FIELD = "<Field>"
 
@@ -82,7 +85,7 @@ local eogChemPump1 =
 	feedID = 2099714343,
 	apiKey = "mRJx9jKahQDHdIVDjd1GaISZOM4pc3XlV5QBPFUgQk7avbjE",
 	isActive = true,
-	primaryPictureURL = CHEM_PUMP_PRIMARY_PICTURE_URL,
+	primaryPictureURL = CHEM_PUMP_1_PRIMARY_PICTURE_URL,
 	specificPictureURLs =
 	{
 	},
@@ -156,18 +159,18 @@ local eogChemPump1 =
 	}
 }
 
-local eogChemTank1 =
+local eogChemTank1A =
 {
 	type = WELLMARK_CHEM_TANK_TYPE,
-	name = "EOG Chem Tank 1",
-	feedID = 2099714343,
-	apiKey = "mRJx9jKahQDHdIVDjd1GaISZOM4pc3XlV5QBPFUgQk7avbjE",
+	name = "EOG Chem Tank 1A",
+	feedID = 2110242284,
+	apiKey = "KNZTnE2wx5JwFzQ3WTj4PhKhGeU2P4bY4Gp2qFmoJiye3kWD",
 	isActive = true,
-	primaryPictureURL = CHEM_TANK_PRIMARY_PICTURE_URL,
+	primaryPictureURL = CHEM_TANK_1A_PRIMARY_PICTURE_URL,
 	specificPictureURLs =
 	{
 	},
-	strappingChartName = "LINEAR_STRAPPING_CHART",
+	strappingChartName = CHEM_TANK_STRAPPING_CHART_350,
 	dataFields =
 	{
 		voltage =
@@ -178,10 +181,12 @@ local eogChemTank1 =
 			xivelyChannelName = "Volts",
 			modifiable = false,
 			graphable = true,
-			minimum = 1.0,
-			maximum = 5.0,
+			minimum = 0.5,  -- Dau Sensor Values
+			maximum = 2.5,  -- Dau Sensor Values
 			minimum_PSI = 0.0,
-			maximum_PSI = 10.0,
+			maximum_PSI = 5.0,
+			voltageOffset = 0,
+      inchesFromBottom = 0,
 			specificGravity = 1.0,
 			shouldNotDisplay = true
 		},
@@ -196,7 +201,7 @@ local eogChemTank1 =
 			yAxisKey = 1,
 			yAxisPosition = "left",
 			defaultMinimumValue = INFORMA_CHEM_TANK_DEFAULT_MINIMUM_VALUE,
-			defaultMaximumValue = 250,
+			defaultMaximumValue = INFORMA_CHEM_TANK_DEFAULT_MAXIMUM_VALUE,
 			graphColorStyleText = INFORMA_CHEM_TANK_GALLON_COLOR_STYLE_TEXT,
 		},
 		temperature =
@@ -214,7 +219,7 @@ local eogChemTank1 =
 			defaultMaximumValue = TEMPERATURE_DEFAULT_MAXIMUM_VALUE,
 			graphColorStyleText = TEMPERATURE_COLOR_STYLE_TEXT,
 		},
-		daysLeftToEmpty =
+		--[[daysLeftToEmpty =
 		{
 			orderIndex = 3,
 			displayName = "Days Left to Empty",
@@ -223,7 +228,109 @@ local eogChemTank1 =
 			pumpFeedID = 2099714343,
 			modifiable = false,
 			graphable = false,
+		},]]
+		--[[highAlarm =
+		{
+			orderIndex = 3,
+			displayName = "High Alarm",
+			units = "",
+			xivelyChannelName = "Switch1",
+			modifiable = false,
+			graphable = false,
+		},]]
+		--[[signalStrength =
+		{
+			orderIndex = 4,
+			displayName = "Signal Strength",
+			units = "dB",
+			xivelyChannelName = "Status_Signal_Strength",
+			modifiable = false,
+			graphable = true
+		},]]
+		--[[battery =
+		{
+			orderIndex = 5,
+			displayName = "Battery",
+			units = "V",
+			xivelyChannelName = "Status_vbat",
+			modifiable = false,
+			graphable = true
+		},]]
+	}
+}
+
+local eogChemTank1 =
+{
+	type = WELLMARK_CHEM_TANK_TYPE,
+	name = "EOG Chem Tank 1",
+	feedID = 2099714343,
+	apiKey = "mRJx9jKahQDHdIVDjd1GaISZOM4pc3XlV5QBPFUgQk7avbjE",
+	isActive = true,
+	primaryPictureURL = CHEM_TANK_1_PRIMARY_PICTURE_URL,
+	specificPictureURLs =
+	{
+	},
+	strappingChartName = CHEM_TANK_STRAPPING_CHART_350,
+	dataFields =
+	{
+		voltage =
+		{
+			orderIndex = 0,
+			displayName = "Voltage",
+			units = "V",
+			xivelyChannelName = "Volts",
+			modifiable = false,
+			graphable = true,
+--			minimum = 1.0,  -- Dwyer Sensor Values
+--			maximum = 5.0,  -- Dwyer Sensor Values
+			minimum = 0.5,   -- Imp sees these values
+			maximum = 2.5,   -- Imp sees these values
+			minimum_PSI = 0.0,
+			maximum_PSI = 2.0,
+			voltageOffset = 0,
+      inchesFromBottom = 0,
+			specificGravity = 1.0,
+			shouldNotDisplay = true
 		},
+		gallons =
+		{
+			orderIndex = 1,
+			displayName = "Gallons",
+			units = "",
+			xivelyChannelName = "Volts_Pressure_Inches_Gallons",
+			modifiable = false,
+			graphable = true,
+			yAxisKey = 1,
+			yAxisPosition = "left",
+			defaultMinimumValue = INFORMA_CHEM_TANK_DEFAULT_MINIMUM_VALUE,
+			defaultMaximumValue = INFORMA_CHEM_TANK_DEFAULT_MAXIMUM_VALUE,
+			graphColorStyleText = INFORMA_CHEM_TANK_GALLON_COLOR_STYLE_TEXT,
+		},
+		temperature =
+		{
+			orderIndex = 2,
+			displayName = "Temperature",
+			units = "",
+--			xivelyChannelName = "Temperature",
+			fixedValue = "N/A",
+			modifiable = false,
+			graphable = false,
+			yAxisKey = 2,
+			yAxisPosition = "right",
+			defaultMinimumValue = TEMPERATURE_DEFAULT_MINIMUM_VALUE,
+			defaultMaximumValue = TEMPERATURE_DEFAULT_MAXIMUM_VALUE,
+			graphColorStyleText = TEMPERATURE_COLOR_STYLE_TEXT,
+		},
+		--[[daysLeftToEmpty =
+		{
+			orderIndex = 3,
+			displayName = "Days Left to Empty",
+			units = "",
+			xivelyChannelName = "Days_Left_To_Empty",
+			pumpFeedID = 2099714343,
+			modifiable = false,
+			graphable = false,
+		},]]
 		--[[highAlarm =
 		{
 			orderIndex = 3,
@@ -256,7 +363,7 @@ local eogChemTank1 =
 
 local eog_Lease =
 {
-	name = "EOG Lease",
+	name = "Phelps & Alexander",
 	id = "988b1990-ee54-451a-809b-96063e527e50",
 	lat = EOG_FIELD_TRIAL_LATITUDE,
 	lon = EOG_FIELD_TRIAL_LONGITUDE,
@@ -268,6 +375,7 @@ local eog_Lease =
 	{
 		eogChemPump1,
 		eogChemTank1,
+		eogChemTank1A,
 	}
 }
 
