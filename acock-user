@@ -1,0 +1,722 @@
+-- BEGIN COMMON HEADER
+
+-- Constants
+
+local WELLMARK_CHEM_PUMP_TYPE = "wellmark-chem-pump"
+local WELLMARK_CHEM_TANK_TYPE = "wellmark-chem-tank"
+local WELLMARK_FLOW_METER_TYPE = "wellmark-flow-meter"
+local WELLMARK_LEVEL_SENSOR_TYPE = "wellmark-level-sensor"
+local WELLMARK_HIGH_LEVEL_ALARM = "wellmark-high-level-alarm"
+
+local CHEM_PUMP_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/chemical-pump-icon.jpg"
+local CHEM_TANK_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/chemical-tank-icon.jpg"
+local LEVEL_SENSOR_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/oil-tank-icon.jpg"
+local HIGH_LEVEL_ALARM_PRIMARY_PICTURE_URL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/oil-tank-icon.jpg"
+
+local CHEM_TANK_STRAPPING_CHART_NAME = "CHEM_TANK_STRAPPING_CHART"
+local CHEM_TANK_STRAPPING_CHART_225 = "CHEM_TANK_STRAPPING_CHART_225"
+local DEVON_CHEM_TANK_STRAPPING_CHART_NAME = "DEVON_CHEM_TANK_STRAPPING_CHART"
+local OIL_AND_BRINE_TANK_STRAPPING_CHART_NAME = "OIL_AND_BRINE_TANK_STRAPPING_CHART"
+
+local ACOCK_BRINE_TANK_STRAPPING_CHART_NAME = "ACOCK_BRINE_TANK_STRAPPING_CHART"
+local ACOCK_OIL_TANK_STRAPPING_CHART_NAME = "ACOCK_OIL_TANK_STRAPPING_CHART"
+
+-- Strapping Chart for Brine Tank - 750bbl, 24ft tall x 15’6” diameter
+-- [ 
+--   [0, 0],
+--   [288, 750]
+-- ]
+
+-- Strapping Chart for Oil Tank - 300bbl, 15ft tall x 12ft diameter
+-- [
+--   [ 0, 0],
+--   [180, 300]
+-- ]
+ 
+-- Quarts Per Day Constants
+
+local QUARTS_PER_DAY_DEFAULT_MINIMUM_VALUE = 0
+local QUARTS_PER_DAY_DEFAULT_MAXIMUM_VALUE = 20
+local QUARTS_PER_DAY_SET_POINT_COLOR_STYLE_TEXT = "rgba(34, 177, 76, 1)"
+
+-- Temperature Constants
+
+local TEMPERATURE_DEFAULT_MINIMUM_VALUE = -50
+local TEMPERATURE_DEFAULT_MAXIMUM_VALUE = 150
+local TEMPERATURE_COLOR_STYLE_TEXT = "rgba(128, 0, 0, 1)"
+
+-- Informa Chem Tank Constants
+
+local INFORMA_CHEM_TANK_DEFAULT_MINIMUM_VALUE = 0
+local INFORMA_CHEM_TANK_DEFAULT_MAXIMUM_VALUE = 200
+local DEVON_CHEM_TANK_DEFAULT_MINIMUM_VALUE = 0
+local DEVON_CHEM_TANK_DEFAULT_MAXIMUM_VALUE = 225
+
+local INFORMA_CHEM_TANK_GALLON_COLOR_STYLE_TEXT = "rgba(128, 128, 64, 1)"
+
+-- Oil and Brine Tank Constants
+
+local INFORMA_OIL_AND_BRINE_TANK_DEFAULT_MINIMUM_VALUE = 0
+local INFORMA_OIL_AND_BRINE_TANK_DEFAULT_MAXIMUM_VALUE = 200
+local INFORMA_OIL_AND_BRINE_TANK_COLOR_STYLE_TEXT = "rgba(92, 72, 46, 1)"
+
+
+local ACOCK_BRINE_TANK_DEFAULT_MINIMUM_VALUE = 0
+local ACOCK_BRINE_TANK_DEFAULT_MAXIMUM_VALUE = 750
+
+local ACOCK_OIL_TANK_DEFAULT_MINIMUM_VALUE = 0
+local ACOCK_OIL_TANK_DEFAULT_MAXIMUM_VALUE = 300
+
+--
+
+function md5RawPassword(rawPassword)
+     local md5edPassword = crypto.md5(rawPassword).hexdigest()
+    
+     return md5edPassword
+end
+
+function callWebscript(localWebscriptName)
+     local absoluteWebscriptName = ("http://wellmark-user.webscript.io/" .. localWebscriptName)
+
+     http.request(
+     {
+          url = absoluteWebscriptName,
+          method = "get",
+          params = {},
+          headers = {}
+     })
+end
+
+-- END COMMON HEADER
+
+-- FIELD TRIAL
+
+local ESWD_FIELD_TRIAL_LATITUDE = 28.3881271
+local ESWD_FIELD_TRIAL_LONGITUDE = -97.1826696
+
+
+local GSWD_FIELD_TRIAL_LATITUDE = 28.3930876
+local GSWD_FIELD_TRIAL_LONGITUDE = -97.17642409
+ 
+local FIELD_TRIAL_REGION = "Central"
+local FIELD_TRIAL_FIELD = "<Field>"
+
+local users = json.parse(storage.users)
+
+-- Acock Anaqua
+
+local AcockESWDBrineTank1=
+{
+     type = WELLMARK_HIGH_LEVEL_ALARM,
+     name = "ESWD Brine Tank 1",
+     feedID = 1202181969,
+     apiKey = "Nv0hQ3JASKbDrxlT7nWMfedLampbxr3AAn3Q0dCD9RigyHqE",
+     isActive = true,
+--     primaryPictureURL = HIGH_LEVEL_ALARM_PRIMARY_PICTURE_URL,
+     primaryPictureURL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/assets/acock/Acock_ESWD_Brine_Tank_1.jpg",
+     specificPictureURLs =
+     {
+     },
+     strappingChartName = ACOCK_BRINE_TANK_STRAPPING_CHART_NAME,
+     dataFields =
+     {
+          voltage =
+          {
+               orderIndex = 0,
+               displayName = "Voltage",
+               units = "V",
+               xivelyChannelName = "Volts",
+               modifiable = false,
+               graphable = true,
+--               minimum = 0.5,    -- Actual Sensor Range
+--               maximum = 4.5,    -- Voltage divided by 2
+               minimum = 0.25,
+               maximum = 2.25,
+               minimum_PSI = 0.0,
+               maximum_PSI = 20,
+			         voltageOffset = 0,
+               inchesFromBottom = 26,
+               specificGravity = 1.1, -- Approx Brine SG
+               shouldNotDisplay = true
+          },
+          barrels =
+          {
+               orderIndex = 1,
+               displayName = "Barrels",
+               units = "",
+               xivelyChannelName = "Volts_Pressure_Inches_Gallons_Barrels",
+               modifiable = false,
+               graphable = true,
+               yAxisKey = 1,
+               yAxisPosition = "left",
+               defaultMinimumValue = ACOCK_BRINE_TANK_DEFAULT_MINIMUM_VALUE ,
+               defaultMaximumValue = ACOCK_BRINE_TANK_DEFAULT_MAXIMUM_VALUE ,
+               graphColorStyleText = INFORMA_OIL_AND_BRINE_TANK_COLOR_STYLE_TEXT,
+          },
+          --[[temperature =
+          {
+               orderIndex = 2,
+               displayName = "Temperature",
+               units = "F",
+               xivelyChannelName = "Temperature",
+               modifiable = false,
+               graphable = true,
+               yAxisKey = 2,
+               yAxisPosition = "right",
+               defaultMinimumValue = TEMPERATURE_DEFAULT_MINIMUM_VALUE,
+               defaultMaximumValue = TEMPERATURE_DEFAULT_MAXIMUM_VALUE,
+               graphColorStyleText = TEMPERATURE_COLOR_STYLE_TEXT,
+          },]]
+          --[[highAlarm =
+          {
+               orderIndex = 3,
+               displayName = "High Alarm",
+               units = "",
+               xivelyChannelName = "Switch1",
+               modifiable = false,
+               graphable = false,
+          },]]
+          --[[signalStrength =
+          {
+               orderIndex = 4,
+               displayName = "Signal Strength",
+               units = "dB",
+               xivelyChannelName = "Status_Signal_Strength",
+               modifiable = false,
+               graphable = true
+          },]]
+          --[[battery =
+          {
+               orderIndex = 5,
+               displayName = "Battery",
+               units = "V",
+               xivelyChannelName = "Status_vbat",
+               modifiable = false,
+               graphable = true
+          },]]
+     }
+}
+
+
+local AcockESWDCrudeTank1=
+{
+     type = WELLMARK_HIGH_LEVEL_ALARM,
+     name = "ESWD Crude Tank 1",
+     feedID = 1324602407,
+     apiKey = "vikLCWloSGX4XCcSi6l9gszLpy1xoZV5oZVdVBo95N7clyt9",
+     isActive = true,
+--     primaryPictureURL = HIGH_LEVEL_ALARM_PRIMARY_PICTURE_URL,
+     primaryPictureURL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/assets/acock/Acock_ESWD_Crude_Tank_1.jpg",
+     specificPictureURLs =
+     {
+     },
+     strappingChartName = ACOCK_OIL_TANK_STRAPPING_CHART_NAME ,
+     dataFields =
+     {
+          voltage =
+          {
+               orderIndex = 0,
+               displayName = "Voltage",
+               units = "V",
+               xivelyChannelName = "Volts",
+               modifiable = false,
+               graphable = true,
+--               minimum = 0.5,    -- Actual Sensor Range
+--               maximum = 4.5,    -- Voltage divided by 2
+               minimum = 0.25,
+               maximum = 2.25,
+               minimum_PSI = 0.0,
+               maximum_PSI = 10,
+			         voltageOffset = 0,
+               inchesFromBottom = 0,
+               specificGravity = 0.82, -- Approx Oil SG
+               shouldNotDisplay = true
+          },
+          barrels =
+          {
+               orderIndex = 1,
+               displayName = "Barrels",
+               units = "",
+               xivelyChannelName = "Volts_Pressure_Inches_Gallons_Barrels",
+               modifiable = false,
+               graphable = true,
+               yAxisKey = 1,
+               yAxisPosition = "left",
+               defaultMinimumValue = ACOCK_OIL_TANK_DEFAULT_MINIMUM_VALUE ,
+               defaultMaximumValue = ACOCK_OIL_TANK_DEFAULT_MAXIMUM_VALUE ,
+               graphColorStyleText = INFORMA_OIL_AND_BRINE_TANK_COLOR_STYLE_TEXT,
+          },
+          --[[temperature =
+          {
+               orderIndex = 2,
+               displayName = "Temperature",
+               units = "F",
+               xivelyChannelName = "Temperature",
+               modifiable = false,
+               graphable = true,
+               yAxisKey = 2,
+               yAxisPosition = "right",
+               defaultMinimumValue = TEMPERATURE_DEFAULT_MINIMUM_VALUE,
+               defaultMaximumValue = TEMPERATURE_DEFAULT_MAXIMUM_VALUE,
+               graphColorStyleText = TEMPERATURE_COLOR_STYLE_TEXT,
+          },]]
+          --[[highAlarm =
+          {
+               orderIndex = 3,
+               displayName = "High Alarm",
+               units = "",
+               xivelyChannelName = "Switch1",
+               modifiable = false,
+               graphable = false,
+          },]]
+          --[[signalStrength =
+          {
+               orderIndex = 4,
+               displayName = "Signal Strength",
+               units = "dB",
+               xivelyChannelName = "Status_Signal_Strength",
+               modifiable = false,
+               graphable = true
+          },]]
+          --[[battery =
+          {
+               orderIndex = 5,
+               displayName = "Battery",
+               units = "V",
+               xivelyChannelName = "Status_vbat",
+               modifiable = false,
+               graphable = true
+          },]]
+     }
+} 
+
+
+local AcockESWDCrudeTank2=
+{
+     type = WELLMARK_HIGH_LEVEL_ALARM,
+     name = "ESWD Crude Tank 2",
+     feedID = 873890869,
+     apiKey = "jev5nT1fXYY3hTwNxsvgP4LcmkitlsRGpLYoMikM5ZZnOygt",
+     isActive = true,
+--     primaryPictureURL = HIGH_LEVEL_ALARM_PRIMARY_PICTURE_URL,
+     primaryPictureURL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/assets/acock/Acock_ESWD_Crude_Tank_2.jpg",
+     specificPictureURLs =
+     {
+     },
+     strappingChartName = ACOCK_OIL_TANK_STRAPPING_CHART_NAME ,
+     dataFields =
+     {
+          voltage =
+          {
+               orderIndex = 0,
+               displayName = "Voltage",
+               units = "V",
+               xivelyChannelName = "Volts",
+               modifiable = false,
+               graphable = true,
+--               minimum = 0.5,    -- Actual Sensor Range
+--               maximum = 4.5,    -- Voltage divided by 2
+               minimum = 0.25,
+               maximum = 2.25,
+               minimum_PSI = 0.0,
+               maximum_PSI = 10,
+						   voltageOffset = 0,
+               inchesFromBottom = 0,
+               specificGravity = 0.82, -- Approx Oil SG
+               shouldNotDisplay = true
+          },
+          barrels =
+          {
+               orderIndex = 1,
+               displayName = "Barrels",
+               units = "",
+               xivelyChannelName = "Volts_Pressure_Inches_Gallons_Barrels",
+               modifiable = false,
+               graphable = true,
+               yAxisKey = 1,
+               yAxisPosition = "left",
+               defaultMinimumValue = ACOCK_OIL_TANK_DEFAULT_MINIMUM_VALUE ,
+               defaultMaximumValue = ACOCK_OIL_TANK_DEFAULT_MAXIMUM_VALUE ,
+               graphColorStyleText = INFORMA_OIL_AND_BRINE_TANK_COLOR_STYLE_TEXT,
+          },
+          --[[temperature =
+          {
+               orderIndex = 2,
+               displayName = "Temperature",
+               units = "F",
+               xivelyChannelName = "Temperature",
+               modifiable = false,
+               graphable = true,
+               yAxisKey = 2,
+               yAxisPosition = "right",
+               defaultMinimumValue = TEMPERATURE_DEFAULT_MINIMUM_VALUE,
+               defaultMaximumValue = TEMPERATURE_DEFAULT_MAXIMUM_VALUE,
+               graphColorStyleText = TEMPERATURE_COLOR_STYLE_TEXT,
+          },]]
+          --[[highAlarm =
+          {
+               orderIndex = 3,
+               displayName = "High Alarm",
+               units = "",
+               xivelyChannelName = "Switch1",
+               modifiable = false,
+               graphable = false,
+          },]]
+          --[[signalStrength =
+          {
+               orderIndex = 4,
+               displayName = "Signal Strength",
+               units = "dB",
+               xivelyChannelName = "Status_Signal_Strength",
+               modifiable = false,
+               graphable = true
+          },]]
+          --[[battery =
+          {
+               orderIndex = 5,
+               displayName = "Battery",
+               units = "V",
+               xivelyChannelName = "Status_vbat",
+               modifiable = false,
+               graphable = true
+          },]]
+     }
+}  
+
+
+
+local AcockGSWDBrineTank1=
+{
+     type = WELLMARK_HIGH_LEVEL_ALARM,
+     name = "GSWD Brine Tank 1",
+     feedID = 1777539117,
+     apiKey = "C0Y79sGlQXbCy1bp4yL3FZ4IcjUtxQaZgsB2NVF9hbwXn5Bz",
+     isActive = true,
+--     primaryPictureURL = HIGH_LEVEL_ALARM_PRIMARY_PICTURE_URL,
+     primaryPictureURL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/assets/acock/Acock_GSWD_Brine_Tank_1.jpg",
+     specificPictureURLs =
+     {
+     },
+     strappingChartName = ACOCK_BRINE_TANK_STRAPPING_CHART_NAME ,
+     dataFields =
+     {
+          voltage =
+          {
+               orderIndex = 0,
+               displayName = "Voltage",
+               units = "V",
+               xivelyChannelName = "Volts",
+               modifiable = false,
+               graphable = true,
+--               minimum = 0.5,    -- Actual Sensor Range
+--               maximum = 4.5,    -- Voltage divided by 2
+               minimum = 0.25,
+               maximum = 2.25,
+               minimum_PSI = 0.0,
+               maximum_PSI = 20,
+			         voltageOffset = 0,
+               inchesFromBottom = 26,
+               specificGravity = 1.1, -- Approx Brine SG
+               shouldNotDisplay = true
+          },
+          barrels =
+          {
+               orderIndex = 1,
+               displayName = "Barrels",
+               units = "",
+               xivelyChannelName = "Volts_Pressure_Inches_Gallons_Barrels",
+               modifiable = false,
+               graphable = true,
+               yAxisKey = 1,
+               yAxisPosition = "left",
+               defaultMinimumValue = ACOCK_BRINE_TANK_DEFAULT_MINIMUM_VALUE ,
+               defaultMaximumValue = ACOCK_BRINE_TANK_DEFAULT_MAXIMUM_VALUE ,
+               graphColorStyleText = INFORMA_OIL_AND_BRINE_TANK_COLOR_STYLE_TEXT,
+          },
+          --[[temperature =
+          {
+               orderIndex = 2,
+               displayName = "Temperature",
+               units = "F",
+               xivelyChannelName = "Temperature",
+               modifiable = false,
+               graphable = true,
+               yAxisKey = 2,
+               yAxisPosition = "right",
+               defaultMinimumValue = TEMPERATURE_DEFAULT_MINIMUM_VALUE,
+               defaultMaximumValue = TEMPERATURE_DEFAULT_MAXIMUM_VALUE,
+               graphColorStyleText = TEMPERATURE_COLOR_STYLE_TEXT,
+          },]]
+          --[[highAlarm =
+          {
+               orderIndex = 3,
+               displayName = "High Alarm",
+               units = "",
+               xivelyChannelName = "Switch1",
+               modifiable = false,
+               graphable = false,
+          },]]
+          --[[signalStrength =
+          {
+               orderIndex = 4,
+               displayName = "Signal Strength",
+               units = "dB",
+               xivelyChannelName = "Status_Signal_Strength",
+               modifiable = false,
+               graphable = true
+          },]]
+          --[[battery =
+          {
+               orderIndex = 5,
+               displayName = "Battery",
+               units = "V",
+               xivelyChannelName = "Status_vbat",
+               modifiable = false,
+               graphable = true
+          },]]
+     }
+}
+
+
+local AcockGSWDCrudeTank1=
+{
+     type = WELLMARK_HIGH_LEVEL_ALARM,
+     name = "GSWD Crude Tank 1",
+     feedID = 1022233769,
+     apiKey = "3puJJakgEe6VRiNQzKV6BLdE5VFCxSMdchAwJ85gzUfM3JX6",
+     isActive = true,
+--     primaryPictureURL = HIGH_LEVEL_ALARM_PRIMARY_PICTURE_URL,
+     primaryPictureURL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/assets/acock/Acock_GSWD_Crude_Tank_1.jpg",
+     specificPictureURLs =
+     {
+     },
+     strappingChartName = ACOCK_OIL_TANK_STRAPPING_CHART_NAME ,
+     dataFields =
+     {
+          voltage =
+          {
+               orderIndex = 0,
+               displayName = "Voltage",
+               units = "V",
+               xivelyChannelName = "Volts",
+               modifiable = false,
+               graphable = true,
+--               minimum = 0.5,    -- Actual Sensor Range
+--               maximum = 4.5,    -- Voltage divided by 2
+               minimum = 0.25,
+               maximum = 2.25,
+               minimum_PSI = 0.0,
+               maximum_PSI = 10,
+			         voltageOffset = 0,
+               inchesFromBottom = 0,
+               specificGravity = 0.82, -- Approx Oil SG
+               shouldNotDisplay = true
+          },
+          barrels =
+          {
+               orderIndex = 1,
+               displayName = "Barrels",
+               units = "",
+               xivelyChannelName = "Volts_Pressure_Inches_Gallons_Barrels",
+               modifiable = false,
+               graphable = true,
+               yAxisKey = 1,
+               yAxisPosition = "left",
+               defaultMinimumValue = ACOCK_OIL_TANK_DEFAULT_MINIMUM_VALUE ,
+               defaultMaximumValue = ACOCK_OIL_TANK_DEFAULT_MAXIMUM_VALUE ,
+               graphColorStyleText = INFORMA_OIL_AND_BRINE_TANK_COLOR_STYLE_TEXT,
+          },
+          --[[temperature =
+          {
+               orderIndex = 2,
+               displayName = "Temperature",
+               units = "F",
+               xivelyChannelName = "Temperature",
+               modifiable = false,
+               graphable = true,
+               yAxisKey = 2,
+               yAxisPosition = "right",
+               defaultMinimumValue = TEMPERATURE_DEFAULT_MINIMUM_VALUE,
+               defaultMaximumValue = TEMPERATURE_DEFAULT_MAXIMUM_VALUE,
+               graphColorStyleText = TEMPERATURE_COLOR_STYLE_TEXT,
+          },]]
+          --[[highAlarm =
+          {
+               orderIndex = 3,
+               displayName = "High Alarm",
+               units = "",
+               xivelyChannelName = "Switch1",
+               modifiable = false,
+               graphable = false,
+          },]]
+          --[[signalStrength =
+          {
+               orderIndex = 4,
+               displayName = "Signal Strength",
+               units = "dB",
+               xivelyChannelName = "Status_Signal_Strength",
+               modifiable = false,
+               graphable = true
+          },]]
+          --[[battery =
+          {
+               orderIndex = 5,
+               displayName = "Battery",
+               units = "V",
+               xivelyChannelName = "Status_vbat",
+               modifiable = false,
+               graphable = true
+          },]]
+     }
+} 
+
+
+local AcockGSWDCrudeTank2=
+{
+     type = WELLMARK_HIGH_LEVEL_ALARM,
+     name = "GSWD Crude Tank 2",
+     feedID = 135448579,
+     apiKey = "BeNkAgyXOKUohMP5AZgjHiBiOOXGi5Wct025POSQW23atGEW",
+     isActive = true,
+--     primaryPictureURL = HIGH_LEVEL_ALARM_PRIMARY_PICTURE_URL,
+     primaryPictureURL = "http://informallc.net/wellmarkco/wp-content/themes/wellmarkco/images/assets/acock/Acock_GSWD_Crude_Tank_2.jpg",
+     specificPictureURLs =
+     {
+     },
+     strappingChartName = ACOCK_OIL_TANK_STRAPPING_CHART_NAME ,
+     dataFields =
+     {
+          voltage =
+          {
+               orderIndex = 0,
+               displayName = "Voltage",
+               units = "V",
+               xivelyChannelName = "Volts",
+               modifiable = false,
+               graphable = true,
+--               minimum = 0.5,    -- Actual Sensor Range
+--               maximum = 4.5,    -- Voltage divided by 2
+               minimum = 0.25,
+               maximum = 2.25,
+               minimum_PSI = 0.0,
+               maximum_PSI = 10,
+               voltageOffset = 0,
+               inchesFromBottom = 0,
+               specificGravity = 0.82, -- Approx Oil SG
+               shouldNotDisplay = true
+          },
+          barrels =
+          {
+               orderIndex = 1,
+               displayName = "Barrels",
+               units = "",
+               xivelyChannelName = "Volts_Pressure_Inches_Gallons_Barrels",
+               modifiable = false,
+               graphable = true,
+               yAxisKey = 1,
+               yAxisPosition = "left",
+               defaultMinimumValue = ACOCK_OIL_TANK_DEFAULT_MINIMUM_VALUE ,
+               defaultMaximumValue = ACOCK_OIL_TANK_DEFAULT_MAXIMUM_VALUE ,
+               graphColorStyleText = INFORMA_OIL_AND_BRINE_TANK_COLOR_STYLE_TEXT,
+          },
+          --[[temperature =
+          {
+               orderIndex = 2,
+               displayName = "Temperature",
+               units = "F",
+               xivelyChannelName = "Temperature",
+               modifiable = false,
+               graphable = true,
+               yAxisKey = 2,
+               yAxisPosition = "right",
+               defaultMinimumValue = TEMPERATURE_DEFAULT_MINIMUM_VALUE,
+               defaultMaximumValue = TEMPERATURE_DEFAULT_MAXIMUM_VALUE,
+               graphColorStyleText = TEMPERATURE_COLOR_STYLE_TEXT,
+          },]]
+          --[[highAlarm =
+          {
+               orderIndex = 3,
+               displayName = "High Alarm",
+               units = "",
+               xivelyChannelName = "Switch1",
+               modifiable = false,
+               graphable = false,
+          },]]
+          --[[signalStrength =
+          {
+               orderIndex = 4,
+               displayName = "Signal Strength",
+               units = "dB",
+               xivelyChannelName = "Status_Signal_Strength",
+               modifiable = false,
+               graphable = true
+          },]]
+          --[[battery =
+          {
+               orderIndex = 5,
+               displayName = "Battery",
+               units = "V",
+               xivelyChannelName = "Status_vbat",
+               modifiable = false,
+               graphable = true
+          },]]
+     }
+}   
+
+
+local fieldTrial_Acock_LeaseESWD =
+{
+     name = "Eastside SWD",
+     id = "2a0088b2-e137-4109-9b3c-acff236d2a20",
+     lat = ESWD_FIELD_TRIAL_LATITUDE ,
+     lon = ESWD_FIELD_TRIAL_LONGITUDE ,
+     physicalAddress = "Refugio, TX",
+     state = "Texas",
+     region = FIELD_TRIAL_REGION,
+     field = FIELD_TRIAL_FIELD,
+     assets =
+     {
+          AcockESWDBrineTank1,
+          AcockESWDCrudeTank1,
+          AcockESWDCrudeTank2
+     }
+}
+
+
+local fieldTrial_Acock_LeaseGSWD =
+{
+     name = "Sohio SWD",
+     id = "2a0088b2-e137-4109-9b3c-acff236d2a21",
+     lat = GSWD_FIELD_TRIAL_LATITUDE ,
+     lon = GSWD_FIELD_TRIAL_LONGITUDE ,
+     physicalAddress = "Refugio, TX",
+     state = "Texas",
+     region = FIELD_TRIAL_REGION,
+     field = FIELD_TRIAL_FIELD,
+     assets =
+     {
+          AcockGSWDBrineTank1,
+          AcockGSWDCrudeTank1,
+          AcockGSWDCrudeTank2
+     }
+} 
+
+local fieldTrial_Acock_User =
+{
+     firstName = "Acock",
+     lastName = "Anaqua",
+     affiliation = "Acock Anaqua",
+     username = "aaoperating",
+     password = md5RawPassword("BlackGold"),
+     userID = "fmb-ea13c1b1-41ad-4e23-abe0-ea082d6d2329",
+     leases =
+     {
+          fieldTrial_Acock_LeaseESWD,
+          fieldTrial_Acock_LeaseGSWD 
+     }
+}
+
+table.insert(users, fieldTrial_Acock_User)
+storage.users = json.stringify(users)
+
+return json.parse(storage.users)
