@@ -183,6 +183,8 @@ local wellmarkLevel =
 			maximum = 4.5,
 			minimum_PSI = 0.0,
 			maximum_PSI = 15,
+			voltageOffset = 0,
+      inchesFromBottom = 0,
 			specificGravity = 1.0,
 			shouldNotDisplay = true
 		},
@@ -280,6 +282,8 @@ local wellmarkDemoSwitch =
 			maximum = 2.5,
 			minimum_PSI = 0.0,
 			maximum_PSI = 10,
+			voltageOffset = 0,
+      inchesFromBottom = 0,
 			specificGravity = 1.0,
 			shouldNotDisplay = true
 		},
