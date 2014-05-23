@@ -19,6 +19,9 @@ local DEVON_CHEM_TANK_STRAPPING_CHART_NAME = "DEVON_CHEM_TANK_STRAPPING_CHART"
 local DEVON_HORIZONTAL_CHEM_TANK_STRAPPING_CHART_NAME = "DEVON_HORIZONTAL_CHEM_TANK_STRAPPING_CHART"
 local OIL_AND_BRINE_TANK_STRAPPING_CHART_NAME = "OIL_AND_BRINE_TANK_STRAPPING_CHART"
 
+
+local ACOCK_BRINE_TANK_STRAPPING_CHART_NAME = "Acock_Brine_Tank_Strapping_Chart"
+
 -- Quarts Per Day Constants
 
 local QUARTS_PER_DAY_DEFAULT_MINIMUM_VALUE = 0
@@ -72,9 +75,10 @@ callWebscript("wellmark-test-user")
 callWebscript("devon-field-trial-informa-user")
 callWebscript("devon-field-trial-devon-user")
 callWebscript("devon-field-trial-wellmark-user")
-callWebscript("informa-christmas-chem-pump-1-user")
-callWebscript("informa-christmas-chem-pump-2-user")
+--callWebscript("informa-christmas-chem-pump-1-user")
+--callWebscript("informa-christmas-chem-pump-2-user")
 callWebscript("eog-user")
+callWebscript("acock-user")
 
 -- TODO: Map userID => leases
 
